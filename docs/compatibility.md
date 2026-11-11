@@ -4,7 +4,7 @@
 
 | 範圍 | 來源描述 / 限制 | Location Lab 證據 |
 | --- | --- | --- |
-| 離線核心 | Python >=3.11，標準庫，無裝置依賴 | 23 個離線 unittest 通過；不代表硬體驗收 |
+| 離線核心與打包 | Python >=3.11，標準庫，無裝置依賴 | 26 個離線 unittest 通過；不代表硬體驗收 |
 | pymobiledevice3 套件 | 2026-11-11 PyPI 最新已發布版為 11.52.1，宣告 Python >=3.9，含 Python 3.15 classifier | 已在本機忽略的隔離 venv 安裝 11.52.1 並核對 CLI；未納入專案發行依賴，這不是本專案降低 Python 門檻的理由 |
 | iOS 17.4+ USB | 上游目前文件：自動 userspace tunnel、通常無需 root | 已在 iOS 27.2 完成一組 set/clear 地圖驗收；不能外推每個新 iOS build 都可用 |
 | iOS 17.0–17.3 + Mac | 上游：native tunnel，無需 root；路徑不同 | 未真機驗證 |

@@ -14,8 +14,17 @@ FILES = (
     "docs/transfer.md", "docs/validation.md",
     "src/location_lab/__init__.py", "src/location_lab/__main__.py",
     "src/location_lab/cli.py", "src/location_lab/core.py",
-    "src/location_lab/planner.py", "src/location_lab/scenarios.py",
-    "tests/test_core.py", "tests/test_cli.py", "tests/test_scenarios.py",
+    "src/location_lab/planner.py", "src/location_lab/scenarios.py", "src/location_lab/places.py",
+    "tests/test_core.py", "tests/test_cli.py", "tests/test_scenarios.py", "tests/test_places.py",
+    "tests/test_export.py", "experiments/README.md",
+    "experiments/device-controller/README.original.md",
+    "experiments/device-controller/device_control.py",
+    "experiments/device-controller/iphone_location.py",
+    "experiments/device-controller/dvt_clear_grace.py",
+    "experiments/device-controller/dvt_location_session.py",
+    "experiments/device-controller/plus_code.py",
+    "experiments/device-controller/DEPENDENCY_VERSIONS.txt",
+    "experiments/device-controller/MANIFEST.sha256",
 )
 
 

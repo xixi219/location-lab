@@ -1,7 +1,8 @@
 # 系統設計與實作計畫
 
 更新：2026-11-11。狀態：架構提案；公開離線核心已實作，公開裝置 adapter 尚未實作。
-本機未發布的實驗控制器僅完成一組真機可行性驗收，不是公開交付的一部分。
+本機實驗控制器僅完成一組真機可行性驗收；恢復用原創來源已存於 `experiments/device-controller/`，
+尚未整合成正式公開 adapter，使用前須讀 `experiments/README.md` 的限制。
 
 ## 產品邊界與成功條件
 
@@ -96,7 +97,7 @@ ADR-004：WLoc 僅作架構參考。其代理/信任鏈問題與 DVT 不同；
 
 ## 測試策略
 
-已執行：23 個核心和 CLI 的離線 unittest；不連網、不連裝置。
+已執行：26 個核心、CLI 和原始碼打包的離線 unittest；不連網、不連裝置。
 規劃 CI：Linux / macOS × Python 3.11、3.12、3.13；尚未建立或執行 GitHub Actions。
 新增 adapter 前測：多裝置歧義、部分 set 成功、clear 逾時、取消競態、
 重啟 journal 恢復、同裝置併發、重複 request、版本不合與輸出遮罩。
