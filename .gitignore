@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+dist/
+build/
+*.egg-info/
+.DS_Store
+.env
+*.pem
+*.p12
+*.key
+*.mobileprovision
+private/

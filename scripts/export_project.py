@@ -1,0 +1,46 @@
+"""Create a deterministic source ZIP from an explicit allowlist."""
+import hashlib
+from pathlib import Path
+from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
+
+ROOT = Path(__file__).resolve().parents[1]
+FILES = (
+    "SECURITY.md", "CONTRIBUTING.md", "docs/system-design.md",
+    "docs/compatibility.md", 
+    ".gitignore", "AGENTS.md", "README.md", "THIRD_PARTY_NOTICES.md",
+    "pyproject.toml", "run.py", "scripts/export_project.py",
+    "docs/architecture.md", "docs/diagrams.md", 
+    "docs/research.md", "docs/roadmap.md", "docs/testing.md",
+    "docs/transfer.md", "docs/validation.md",
+    "src/location_lab/__init__.py", "src/location_lab/__main__.py",
+    "src/location_lab/cli.py", "src/location_lab/core.py",
+    "src/location_lab/planner.py", "src/location_lab/scenarios.py",
+    "tests/test_core.py", "tests/test_cli.py", "tests/test_scenarios.py",
+)
+
+
+def export(root=ROOT):
+    entries = {}
+    for name in sorted(FILES):
+        path = root / name
+        if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(root.resolve()):
+            raise ValueError(f"Expected regular project file: {name}")
+        entries[name] = path.read_bytes()
+    entries["MANIFEST.sha256"] = "".join(
+        f"{hashlib.sha256(data).hexdigest()}  {name}\n" for name, data in entries.items()
+    ).encode()
+    output = root / "dist" / "location-lab-source.zip"
+    output.parent.mkdir(exist_ok=True)
+    with ZipFile(output, "w", compression=ZIP_DEFLATED) as archive:
+        for name, data in entries.items():
+            info = ZipInfo("location-lab/" + name, date_time=(2026, 11, 7, 0, 0, 0))
+            info.compress_type = ZIP_DEFLATED
+            info.external_attr = 0o100644 << 16
+            archive.writestr(info, data)
+    digest = hashlib.sha256(output.read_bytes()).hexdigest()
+    output.with_suffix(".zip.sha256").write_text(f"{digest}  {output.name}\n")
+    return output
+
+
+if __name__ == "__main__":
+    print(export())
