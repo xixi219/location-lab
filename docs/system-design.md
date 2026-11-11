@@ -1,6 +1,7 @@
 # 系統設計與實作計畫
 
-更新：2026-11-11。狀態：架構提案；離線核心已實作，裝置 adapter 尚未實作。
+更新：2026-11-11。狀態：架構提案；公開離線核心已實作，公開裝置 adapter 尚未實作。
+本機未發布的實驗控制器僅完成一組真機可行性驗收，不是公開交付的一部分。
 
 ## 產品邊界與成功條件
 
@@ -23,7 +24,7 @@ Location Lab 是以 Mac 為主機的 iPhone 定位模擬研究工具。
 | Command planner | 已實作 | argv JSON，不執行；尚無裝置選擇，不可直接當正式執行器 |
 | Device discovery / preflight | 規劃 | 枚舉、明確選一台裝置、檢查版本/配對/服務 |
 | Session supervisor | 規劃 | 每裝置一個 owner、序列化操作、取消、存活監控 |
-| pymobiledevice3 adapter | 規劃 | 隔離上游 API / CLI 差異；固定版本後整合 |
+| pymobiledevice3 adapter | 規劃 | 本機實驗控制器已驗證單一組合；公開版仍須隔離 API / CLI 差異、固定版本與授權決策 |
 | Recovery journal | 規劃 | 執行前記錄意圖；程序死亡後視為 unknown，不自動重設位置 |
 | Observation | 規劃 | 與指令 ACK 分開；來源、時間、偏差、手動/自動標記 |
 | UI | 規劃 | 首先本機介面，手機遠端控制不屬於第一個真機里程碑 |
@@ -38,7 +39,7 @@ flowchart TD
     S -.-> P["Preflight + 裝置鎖｜規劃"]
     P -.-> J["操作意圖 journal｜規劃"]
     J -.-> A["Device adapter｜規劃"]
-    A -.-> D["iPhone developer services｜未真機驗證"]
+    A -.-> D["iPhone developer services｜單一組合已驗證"]
     D -.-> R["ACK / failure / timeout｜規劃"]
     R -.-> S
     O["獨立定位觀察｜規劃"] -.-> U["UI：請求狀態 + 觀察狀態"]
@@ -85,7 +86,7 @@ ADR-004：WLoc 僅作架構參考。其代理/信任鏈問題與 DVT 不同；
 | --- | --- | --- |
 | P0 公開研究骨架 | 文件、離線 CLI、測試、原始碼包 | 已具備；公開授權/目的 repo/寫入通道待確定 |
 | P1 核心強化 | 非同步狀態、操作鎖、journal、fake transport | 斷線/取消/逾時/損壞/重啟/重複請求測試通過；不接真機也可做 |
-| P2 真機 feasibility spike | 固定上游版本與測試報告 | Mac+iPhone 可用；單台 set/clear 與獨立觀察成功；失敗則停止 UI 擴充、記錄原因 |
+| P2 真機 feasibility spike | 固定上游版本與測試報告 | iOS 27.2 的一台 USB 裝置已完成 set / clear 與獨立觀察；不得外推至其他組合 |
 | P3 最小實機 adapter | 明確選裝置、preflight、session owner、恢復 | 故障矩陣通過；未測版本顯示 unverified |
 | P4 本機 UI | 座標、裝置別名、請求/觀察狀態、恢復按鈕 | 操作序列清楚，未知狀態不能假裝成功；先不開 LAN |
 | P5 公開 release | 授權、固定依賴、建置流程、相容矩陣 | CI + 真機證據 + 隱私檢查；不以原型 ZIP 宣稱成品 |
@@ -95,7 +96,7 @@ ADR-004：WLoc 僅作架構參考。其代理/信任鏈問題與 DVT 不同；
 
 ## 測試策略
 
-已執行：Linux Python 3.12 的 19 個 unittest；核心和 CLI 離線情境。
+已執行：23 個核心和 CLI 的離線 unittest；不連網、不連裝置。
 規劃 CI：Linux / macOS × Python 3.11、3.12、3.13；尚未建立或執行 GitHub Actions。
 新增 adapter 前測：多裝置歧義、部分 set 成功、clear 逾時、取消競態、
 重啟 journal 恢復、同裝置併發、重複 request、版本不合與輸出遮罩。

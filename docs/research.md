@@ -79,3 +79,10 @@ DVT 開發者服務路線仍須另做真機驗證，不能由 WLoc 的結果推�
 
 pymobiledevice3 的 pyproject 在本次讀取宣告 GPL-3.0-or-later、Python >=3.9；
 Location Lab 核心仍為 Python >=3.11。完整矩陣見 compatibility.md。
+
+## 2026-11-11 上游持續性修正
+
+[v11.50.1 release notes](https://github.com/doronz88/pymobiledevice3/releases/tag/v11.50.1) 說明：先前 userspace
+tunnel 的長連線 CLI 命令在等待中會阻塞維持隧道的事件迴圈；`developer dvt simulate-location set` 與 `play`
+可能因此在設定後不久還原真實位置。該版將等待改為不阻塞。這讓它成為本機試驗的最低候選版，
+但只是一份上游描述，不能替代本專案裝置上的 set、持續觀察與 clear 恢復驗收。

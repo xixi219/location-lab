@@ -38,6 +38,7 @@ UI 不直接拼接 shell 字串，不取得 pairing secrets。裝置 adapter 負
 set 長連線保持；中斷與失敗分開處理；clear 的逾時不能當成功；
 輸出經過遮罩，避免紀錄配對檔、實際經緯度與完整裝置 ID。
 不用短暫 subprocess.run 成功返回來假裝維持定位 session。
+set 的子程序必須由同一個 session owner 結束並確認不再殘留；否則後續 clear 不能作為恢復證據。
 初版未實作這些功能，因此不提供 --execute。
 
 未來本機 HTTP 控制端需 loopback bind、Origin/Host 檢查、session token、

@@ -1,6 +1,7 @@
 import contextlib
 import io
 import json
+import tempfile
 import unittest
 from location_lab.cli import main
 
@@ -35,3 +36,12 @@ class CliTests(unittest.TestCase):
                 with self.assertRaises(SystemExit) as exc:
                     main(argv)
                 self.assertEqual(exc.exception.code, 2)
+
+    def test_places_route_is_not_device_execution(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = f"{directory}/places.json"
+            self.run_cli(["places", "save", "--store", store, "--name", "Tokyo",
+                          "--latitude", "35.6812", "--longitude", "139.7671"])
+            result = self.run_cli(["places", "route", "--store", store, "Tokyo"])
+        self.assertEqual(result["mode"], "route-plan-only")
+        self.assertFalse(result["executed"])

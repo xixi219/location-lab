@@ -9,9 +9,16 @@
 ## M1：真機可行性（Mac 可用時）
 - [ ] 收集 iPhone 型號 / iOS build / Mac OS
 - [ ] 選定 pymobiledevice3 發布版本，固定依賴並建立版本相容矩陣
-- [ ] 先驗證單一裝置 set / clear，測試失敗恢復
+- [x] 單一 USB 裝置的 set / clear 與 Google Maps 獨立觀測（僅已測 iOS 27.2 組合）
+- [ ] 測試拔線、鎖屏、重連、程序中止後的恢復
 - [ ] 再實作可取消、可恢復的 device adapter
 - [ ] 決定整合／散布授權及保留告知方式
+
+## M1.1：本機路線規劃（本次）
+- [x] 私有收藏庫：名稱與 WGS84 座標，預設不寫入專案或 Git
+- [x] 指定順序的多站 route plan，以及免 API key 的 Google Maps 搜尋連結
+- [ ] 真機 adapter 通過單點 set/clear 驗收後，才能把 route 的「下一站」接到明確選定的裝置
+- [ ] 每一站寫入前後仍需顯示請求狀態與獨立位置觀測；不以 route 程式結束宣稱恢復
 
 ## M2：手機友善介面
 - [ ] 座標輸入、地點收藏、地圖供應商與資料隱私選型

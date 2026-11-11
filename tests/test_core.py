@@ -84,6 +84,8 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(plan["argv"][-3:], ["--", "-33.8", "-70.6"])
         self.assertFalse(plan["executed"])
         self.assertFalse(plan["hardware_verified"])
+        self.assertIn(">=11.50.1", plan["requirements"][0])
+        self.assertIn("persists", plan["requirements"][-1])
 
     def test_clear_plan(self):
         self.assertEqual(command_plan("clear")["argv"][-1], "clear")

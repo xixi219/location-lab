@@ -21,9 +21,9 @@ def command_plan(action: str, point: Coordinate | None = None) -> dict:
         "hardware_verified": False,
         "argv": argv,
         "requirements": [
-            "Compatible locally installed pymobiledevice3; verify its --help",
+            "Compatible locally installed pymobiledevice3 (for userspace hold tests, use >=11.50.1); verify its --help",
             "One explicitly identified trusted iPhone; iOS/build recorded",
             "Developer services, image and transport prerequisites verified",
-            "For set, keep the session alive; separately clear and verify recovery",
+            "For set, keep the session alive and independently observe it persists; separately clear and verify recovery",
         ],
     }

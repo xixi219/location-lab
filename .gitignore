@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+.device-venv/
 dist/
 build/
 *.egg-info/
@@ -11,3 +12,4 @@ build/
 *.key
 *.mobileprovision
 private/
+handoff/
