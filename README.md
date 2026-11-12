@@ -63,3 +63,13 @@ demo 的狀態只屬於 mock 後端，結束即消失。plan 不代表指令已�
 本專案尚未選定公開授權。公開 repo：https://github.com/xixi219/location-lab 。初版為新寫的實作，未複製 WLoc 或
 pymobiledevice3 原始碼，也未捆綁這兩個依賴。參考來源與授權列於
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。正式整合或散布前再確定授權及依賴版本。
+
+## 下一站按鈕（離線原型）
+
+現在可用私人佇列演練「下一個」：顯示目前／下一站與進度，不需手動輸入座標。
+[操作、安全邊界及下一階段](docs/next-stop.md)。本階段只有 loopback UI + mock，
+不是手機聊天或 USB 控制；可選私人 journal 保存進度，重啟／未知／斷線狀態必須明確恢復，沒有自動播放。
+
+```sh
+PYTHONPATH=src python3 -m location_lab.next_stop_web --queue /absolute/private/queue.json
+```

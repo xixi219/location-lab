@@ -1,6 +1,6 @@
 # 系統設計與實作計畫
 
-更新：2026-11-11。狀態：架構提案；公開離線核心已實作，公開裝置 adapter 尚未實作。
+更新：2026-11-12。狀態：架構提案；公開離線核心已實作，公開裝置 adapter 尚未實作。
 本機實驗控制器僅完成一組真機可行性驗收；恢復用原創來源已存於 `experiments/device-controller/`，
 尚未整合成正式公開 adapter，使用前須讀 `experiments/README.md` 的限制。
 
@@ -26,9 +26,9 @@ Location Lab 是以 Mac 為主機的 iPhone 定位模擬研究工具。
 | Device discovery / preflight | 規劃 | 枚舉、明確選一台裝置、檢查版本/配對/服務 |
 | Session supervisor | 規劃 | 每裝置一個 owner、序列化操作、取消、存活監控 |
 | pymobiledevice3 adapter | 規劃 | 本機實驗控制器已驗證單一組合；公開版仍須隔離 API / CLI 差異、固定版本與授權決策 |
-| Recovery journal | 規劃 | 執行前記錄意圖；程序死亡後視為 unknown，不自動重設位置 |
+| Recovery journal | 離線版已實作 | 私人原子 intent／cursor／回條，queue 與 device hash 綁定；重啟 unknown，不重播 |
 | Observation | 規劃 | 與指令 ACK 分開；來源、時間、偏差、手動/自動標記 |
-| UI | 規劃 | 首先本機介面，手機遠端控制不屬於第一個真機里程碑 |
+| UI | loopback 離線版已實作 | 下一站按鈕、進度、明確清除；真機及手機聊天控制尚未實作 |
 
 ## 資料流
 
@@ -54,7 +54,7 @@ clear：保持同一裝置關聯 → 送清除 → ACK 僅標示 cleared →
 獨立觀察確認；失敗保留 unknown 並允許重試。
 恢復時不得默默選第一台裝置，也不得自動重放上次目標座標。
 
-## 資料契約（規劃，尚未新增持久化）
+## 真機資料契約（規劃；離線 journal 契約另見 next-stop.md）
 
 - LocationRequest：request_id、schema_version=1、coordinate_system=wgs84、lat/lon、session_id。
 - DeviceHandle：opaque 本機識別、iOS build、host build、transport、backend version。
@@ -103,3 +103,12 @@ ADR-004：WLoc 僅作架構參考。其代理/信任鏈問題與 DVT 不同；
 重啟 journal 恢復、同裝置併發、重複 request、版本不合與輸出遮罩。
 真機矩陣：完整 iOS build / Mac OS build / CPU / Python / 上游版本 / USB或Wi-Fi，
 記錄 set、維持、clear、拔線、鎖屏、退出、重連；只對實測組合宣稱支援。
+
+## 2026-11-12 離線 UI 增補
+
+[下一站按鈕](next-stop.md) 已加入隔離的標準庫 controller 與 loopback 預覽，僅 MemoryBackend／fake-only 裝置邊界。
+這是 ADR-002 的有限延伸：不新增裝置 adapter、資料庫、雲端 relay 或第三方相依。
+命令入口提供鎖、epoch／version、request ID 去重與可選私人原子 journal；重啟保存進度但不重播，必須重新 preflight＋clear。
+P1 已有同步 fake 與 durable intent／回條測試，尚未具備真機非同步 supervisor／取消屏障；
+fake owner 另有獨立於 journal 的 identity hash POSIX lease，跨程序互斥已離線驗證。
+P3 真機 adapter／裝置 lifecycle 整合與 P4 真機 UI 的驗收門檻仍未完成。
