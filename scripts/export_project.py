@@ -16,6 +16,8 @@ FILES = (
     "src/location_lab/cli.py", "src/location_lab/core.py",
     "src/location_lab/planner.py", "src/location_lab/scenarios.py", "src/location_lab/places.py",
     "tests/test_core.py", "tests/test_cli.py", "tests/test_scenarios.py", "tests/test_places.py",
+    "src/location_lab/local_control.py", "tests/test_local_control.py", "docs/mac-usb-control.md",
+    "src/location_lab/usb_transport.py", "src/location_lab/usb_worker.py", "tests/test_usb_transport.py", "tests/test_usb_controller.py",
     "src/location_lab/progress_journal.py", "src/location_lab/device_boundary.py",
     "tests/test_progress_journal.py", "tests/test_device_boundary.py",
     "src/location_lab/next_stop.py", "src/location_lab/next_stop_web.py",

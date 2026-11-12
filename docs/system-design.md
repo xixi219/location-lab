@@ -1,6 +1,6 @@
 # 系統設計與實作計畫
 
-更新：2026-11-12。狀態：架構提案；公開離線核心已實作，公開裝置 adapter 尚未實作。
+更新：2026-11-12。狀態：架構提案；公開離線核心已實作，公開 USB adapter 原型已實作，尚未真機驗收。
 本機實驗控制器僅完成一組真機可行性驗收；恢復用原創來源已存於 `experiments/device-controller/`，
 尚未整合成正式公開 adapter，使用前須讀 `experiments/README.md` 的限制。
 
@@ -25,7 +25,7 @@ Location Lab 是以 Mac 為主機的 iPhone 定位模擬研究工具。
 | Command planner | 已實作 | argv JSON，不執行；尚無裝置選擇，不可直接當正式執行器 |
 | Device discovery / preflight | 規劃 | 枚舉、明確選一台裝置、檢查版本/配對/服務 |
 | Session supervisor | 規劃 | 每裝置一個 owner、序列化操作、取消、存活監控 |
-| pymobiledevice3 adapter | 規劃 | 本機實驗控制器已驗證單一組合；公開版仍須隔離 API / CLI 差異、固定版本與授權決策 |
+| pymobiledevice3 adapter | 明確 opt-in 原型 | 隔離11.52.1 SDK worker、持久session、USB-only及停止屏障，只有 doubles 測試；仍待真機與授權驗收 |
 | Recovery journal | 離線版已實作 | 私人原子 intent／cursor／回條，queue 與 device hash 綁定；重啟 unknown，不重播 |
 | Observation | 規劃 | 與指令 ACK 分開；來源、時間、偏差、手動/自動標記 |
 | UI | loopback 離線版已實作 | 下一站按鈕、進度、明確清除；真機及手機聊天控制尚未實作 |
@@ -112,3 +112,11 @@ ADR-004：WLoc 僅作架構參考。其代理/信任鏈問題與 DVT 不同；
 P1 已有同步 fake 與 durable intent／回條測試，尚未具備真機非同步 supervisor／取消屏障；
 fake owner 另有獨立於 journal 的 identity hash POSIX lease，跨程序互斥已離線驗證。
 P3 真機 adapter／裝置 lifecycle 整合與 P4 真機 UI 的驗收門檻仍未完成。
+
+
+## USB production-path 原型增補（尚未真機驗收）
+
+[Mac USB 控制](mac-usb-control.md) 新增 lazy pinned-SDK 子程序、明確 opt-in、選定 USB identity、
+持久 DVT session、request ID／generation 與停止屏障。這是可測試實作路徑，不是已驗證硬體支援。
+原 experiments 快照沒有變動，新入口不載入它。SDK clear 只代表 dispatch 返回，不稱裝置 ACK。
+另有私人 Unix socket 的一次性 status／receipt／next／clear 介面，不等於常駐手機聊天路由。

@@ -1,7 +1,8 @@
 # Location Lab — iPhone 定位模擬工作空間
 
 獨立的 iPhone 定位模擬研究專案，暫定名稱 Location Lab。
-**主 CLI 仍是可執行、可測試的離線初版；另保存可恢復的實驗控制器原始碼，尚未正式整合或完成故障矩陣。**
+**預設仍是可測試的離線模式；新增明確 opt-in 的 Mac USB transport 原型，尚未真機驗收。**
+[Mac USB 與單次本機命令](docs/mac-usb-control.md)。
 
 這是位置（WGS84 經緯度／GPS 定位輸出）模擬專案，不是 IP 位址修改器。
 不承諾第三方 App 接受模擬位置，不實作遊戲偵測規避。
@@ -20,7 +21,7 @@
 - 產生 pymobiledevice3 DVT 指令計畫；只輸出 JSON，**不執行指令**。
 - 閱讀 WLoc 架構、失效證據、技術選型和真機驗收清單。
 
-主程式交付的是離線研究骨架。2026-11-11 曾以本機實驗控制器在已信任的
+預設交付離線研究骨架，USB opt-in 原型另待真機驗收。2026-11-11 曾以本機實驗控制器在已信任的
 iPhone 上完成單點 set / clear 的 Google Maps 獨立觀測；詳見
 [相容性與可行性證據](docs/compatibility.md)。該控制器及其相依尚未完成散布授權、故障矩陣與
 產品化審查，因此未整合至主 CLI。為方便恢復，原創來源快照另存於 `experiments/device-controller/`；
@@ -67,8 +68,8 @@ pymobiledevice3 原始碼，也未捆綁這兩個依賴。參考來源與授權�
 ## 下一站按鈕（離線原型）
 
 現在可用私人佇列演練「下一個」：顯示目前／下一站與進度，不需手動輸入座標。
-[操作、安全邊界及下一階段](docs/next-stop.md)。本階段只有 loopback UI + mock，
-不是手機聊天或 USB 控制；可選私人 journal 保存進度，重啟／未知／斷線狀態必須明確恢復，沒有自動播放。
+[操作、安全邊界及下一階段](docs/next-stop.md)。預設為 loopback UI + mock；另有明確 opt-in 的 USB 原型，尚未真機驗收或接線手機聊天。
+可選私人 journal 保存進度，重啟／未知／斷線狀態必須明確恢復，沒有自動播放。
 
 ```sh
 PYTHONPATH=src python3 -m location_lab.next_stop_web --queue /absolute/private/queue.json

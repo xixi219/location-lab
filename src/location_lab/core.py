@@ -32,7 +32,7 @@ class State(str, Enum):
 
 
 class Session:
-    """Acknowledged backend state, never independent GPS verification.
+    """Backend-call returned state, never independent GPS verification or device ACK.
 
     Backend operations may partially succeed before raising. In that case, keep
     UNKNOWN until a subsequent explicit clear succeeds. Do not allow another set.

@@ -1,6 +1,7 @@
-"""Private queue + serialized OFFLINE controller with optional durable progress.
+"""Private queue + serialized controller with optional durable progress.
 
-No real device transport, network client, or restart replay.
+Defaults to offline mock; opt-in unverified USB transport is tested only with
+doubles here. No automatic restart replay.
 """
 import hashlib
 import json
@@ -44,9 +45,10 @@ def load_queue(path):
 
 
 class NextStopController:
-    """Serialized offline owner with optional durable intent and receipts.
+    """Serialized owner with optional durable intent and receipts.
 
-    Never supply a real backend to this prototype.
+    Real USB requires the explicit opt-in unverified backend; offline tests use
+    memory, fake transport, or production-path doubles only.
 
     Each request is bound to epoch + version + action. Accepted attempts consume a
     version even on failure. Unknown/disconnect blocks next. Clear does not rewind
@@ -72,7 +74,8 @@ class NextStopController:
         selected_identity = getattr(self.session.backend, "identity", "memory-mock")
         if device_identity is not None and device_identity != selected_identity:
             raise ValueError("journal identity must match selected backend")
-        self._device_hash = hashlib.sha256(selected_identity.encode()).hexdigest()
+        backend_mode = "mock" if getattr(self.session.backend, "simulated", True) else "usb-unverified"
+        self._device_hash = hashlib.sha256((backend_mode + ":" + selected_identity).encode()).hexdigest()
         if journal_path is not None:
             try:
                 self.journal = ProgressJournal(journal_path)
@@ -137,15 +140,30 @@ class NextStopController:
         with self._lock:
             def display(stop):
                 return {"name": stop.name, "address": stop.address}
-            return {"mode": "offline-mock", "device_connected": False,
+            simulated = getattr(self.session.backend, "simulated", True)
+            ready = self.connected and getattr(self.session.backend, "ready", True)
+            return {"mode": "offline-mock" if simulated else "usb-unverified", "device_connected": False,
+                    "connection_status": "offline-mock" if simulated else "not_live_verified",
+                    "last_preflight_succeeded": ready,
+                    "control_connected": ready, "simulated": simulated,
                     "hardware_verified": False, "physical_restored": False,
-                    "mock_connected": self.connected, "state": self.session.state.value,
+                    "mock_connected": self.connected if simulated else False, "state": self.session.state.value,
                     "epoch": self.epoch, "version": self.version,
                     "completed": self.cursor, "total": len(self.stops),
                     "current": display(self.stops[self.cursor - 1]) if self.cursor and self.session.state == State.ACTIVE else None,
                     "next": display(self.stops[self.cursor]) if self.cursor < len(self.stops) else None,
                     "durable_progress": self.journal is not None, "storage_fault": self.storage_fault,
-                    "can_next": not self.closed and not self.storage_fault and self.connected and self.session.state != State.UNKNOWN and self.cursor < len(self.stops)}
+                    "can_next": not self.closed and not self.storage_fault and ready and self.session.state != State.UNKNOWN and self.cursor < len(self.stops)}
+
+    def lookup_receipt(self, request_id):
+        """Read-only resolution of an uncertain command; never replay or rebind."""
+        with self._lock:
+            if not isinstance(request_id, str) or not 1 <= len(request_id) <= 128:
+                return {"ok": False, "code": "invalid_request"}
+            key = hashlib.sha256(request_id.encode()).hexdigest()
+            entry = self._receipts.get(key)
+            return {"ok": True, "found": entry is not None,
+                    "receipt": dict(entry[1]) if entry else None}
 
     def execute(self, request):
         with self._lock:
@@ -166,7 +184,7 @@ class NextStopController:
                 return {"ok": False, "code": "wrong_session"}
             if request["version"] != self.version:
                 return {"ok": False, "code": "stale_command"}
-            if request["action"] not in {"connect_mock", "disconnect_mock", "next", "clear"}:
+            if request["action"] not in {"connect_mock", "disconnect_mock", "preflight", "disconnect", "next", "clear"}:
                 return {"ok": False, "code": "invalid_action"}
             if len(self._receipts) >= 10000:
                 return {"ok": False, "code": "session_limit"}
@@ -189,11 +207,11 @@ class NextStopController:
             action = request["action"]
             code = "ok"
             try:
-                if action == "connect_mock":
+                if action in {"connect_mock", "preflight"}:
                     if hasattr(self.session.backend, "preflight"):
                         self.session.backend.preflight()
                     self.connected = True
-                elif action == "disconnect_mock":
+                elif action in {"disconnect_mock", "disconnect"}:
                     if hasattr(self.session.backend, "disconnect"):
                         self.session.backend.disconnect()
                     self.connected = False

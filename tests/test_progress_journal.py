@@ -45,6 +45,7 @@ class DurableTests(unittest.TestCase):
         self.assertEqual(self.c.cursor, 1)
         self.assertFalse(self.c.snapshot()['can_next'])
         self.assertEqual(self.c.execute(req), receipt)
+        self.assertEqual(self.c.lookup_receipt(req['request_id'])['receipt'], receipt)
         self.assertEqual(self.c.execute(old)['code'], 'wrong_session')
         self.assertEqual(self.backend.sets, 1)
         self.ready(); self.act('next')

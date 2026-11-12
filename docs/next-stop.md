@@ -1,7 +1,7 @@
 # 下一站：離線按鈕原型
 
-更新：2026-11-12。只使用標準函式庫、MemoryBackend 與 fake-only 裝置邊界；不載入實驗控制器、
-不連接 iPhone、不操作遊戲或其他 App，不修改 IP。這不是已完成的真機產品。
+更新：2026-11-12。只使用標準函式庫、MemoryBackend 與 fake-only 裝置邊界；預設不連接 iPhone，不載入實驗控制器。另有 [明確 opt-in 的 USB 原型](mac-usb-control.md)，
+尚未真機驗收。不操作遊戲或其他 App，不修改 IP。這不是已完成的真機產品。
 
 ## 使用
 
@@ -34,7 +34,7 @@ PYTHONPATH=src python3 -m location_lab.next_stop_web \
 `fake-device` 只接受 FakeDeviceTransport，`--device` 是明確指定的合成識別，不會搜尋真機。
 未指定 backend 時仍為 memory。兩種方式都顯示「離線演練／未連接 iPhone」。
 裝置契約分開實作 exact identity、preflight、程序內唯一 owner、同步命令與故障後封鎖。
-不准用此旗標啟動舊實驗控制器；沒有 real backend 選項。
+不准用此旗標啟動舊實驗控制器；另有 usb 選項，但必須另給 allow-device-write／私人識別檔／journal，詳見 Mac 控制文件。
 
 **指定 journal 時，重啟保留已完成 cursor 與去重回條，但使用新 epoch 並回到 disconnected + unknown；
 須明確啟用／preflight，再 clear 才能 next。從不重播未完成指令。未指定 journal 時進度仍在重啟後歸零。**
@@ -54,7 +54,7 @@ journal 檔案是 0600，父目錄須為目前使用者擁有的 0700，必須�
 不保存座標、店名、地址、原始 request ID 或裝置識別。hash 不是加密，檔案仍需私人保護。
 儲存失敗／損毀／綁定不符必須人工檢查，程式不偷偷重設或自動刪除。
 
-停止程序不等於實體裝置恢復。clear 成功只是 mock ACK；
+停止程序不等於實體裝置恢復。在離線模式 clear 成功只表示 mock 呼叫返回；
 `physical_restored`、`hardware_verified`、`device_connected` 固定為 false。
 
 ## 私人佇列
@@ -68,10 +68,10 @@ journal 檔案是 0600，父目錄須為目前使用者擁有的 0700，必須�
 
 ## 命令契約與安全
 
-`NextStopController.execute` 是未來 chat adapter 可呼叫的獨立入口，**尚未接上聊天**。
+`NextStopController.execute` 是獨立入口；新增本機 one-shot CLI 可供未來 chat adapter 呼叫，**尚未接上聊天**。
 先取得 snapshot，再傳 `request_id`（唯一字串）、`epoch`、`version` 與 `action`。
-action 限定 `next`、`clear`、`connect_mock`、`disconnect_mock`。
-最後兩者只供測試；fake-device 的 preflight 也只查合成資料，不能等同真機 preflight。
+action 包含 `next`、`clear`、`preflight`、`disconnect`；`connect_mock`／`disconnect_mock` 保留為舊介面別名。
+fake-device 的 preflight 只查合成資料；USB 模式才會在明確 opt-in 下呼叫真實 worker。
 
 - 單一 controller 鎖序列化判斷及後端呼叫；同時兩個相同版本的 next 最多一個成功。
 - 同 ID、同內容回傳原回條；同 ID 改內容拒絕。回條不是最新 snapshot，之後必須重新讀狀態。
@@ -89,8 +89,9 @@ action 限定 `next`、`clear`、`connect_mock`、`disconnect_mock`。
 Mac companion 才能持有 USB／開發者通道及唯一裝置 owner。
 正式 adapter 仍需真機 preflight、既有跨程序 lease 的真實裝置綁定、逾時／取消 quiescence 屏障、斷線通知、
 現有 journal 與實機生命周期整合、故障後恢復及獨立地圖觀察。ACK 不等於第三方 App 已接受定位。
-fake-only 邊界拒絕 real transport；不能移除檢查後就視為完成以上保護。
-目前沒有非同步 ACK 接收入口，無背景 thread timeout；晚到 ACK 拒絕及 cancellation fencing 屬未來真機驗收。
+fake 邊界仍拒絕 real transport，新的 USB backend 另行隔離實作，並非移除 fake gate。
+USB worker 的 generation／request ID、程序停止屏障須配合真機生命周期驗收；
+clear 呼叫返回不是 ACK。沒有 unsafe 背景 thread timeout。
 
 手機說「可以下一個」的 chat-trigger adapter 必須將單次明確意圖對應到指定 session、
 版本與唯一 request ID，由已授權連線到 Mac 的路徑送給本機 controller；目前沒有接線或驗收。
